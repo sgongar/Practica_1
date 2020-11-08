@@ -1,4 +1,3 @@
-# import millennium_query
 from os import getcwd
 import pandas as pd
 
@@ -24,8 +23,8 @@ def output_galaxies(galaxy_classification, label, sizes):
 
     @return
     """
-    total_redshift_list = []
-    total_mass_list = []
+    total_log_redshift_list = []
+    total_log_mass_list = []
 
     data_dir = f'{getcwd()}/datos/{galaxy_classification}.csv'
     data = pd.read_csv(data_dir, error_bad_lines=False)
@@ -71,8 +70,8 @@ def output_galaxies(galaxy_classification, label, sizes):
                     final_mass = float(data['stellarMass'].iloc[final_mass_idx])
                 if final_mass != 0.0:
                     # Agrega los datos a la lista total
-                    total_redshift_list.append(log(1+row['redshift']))
-                    total_mass_list.append(log(row['stellarMass']/final_mass))
+                    total_log_redshift_list.append(log(1+row['redshift']))
+                    total_log_mass_list.append(log(row['stellarMass']/final_mass))
 
                     redshift_list.append(log(1+row['redshift']))
                     mass_list.append(log(row['stellarMass']/final_mass))
@@ -85,8 +84,8 @@ def output_galaxies(galaxy_classification, label, sizes):
             # Agrega los valores si no hay valores nulos
             else:
                 if row['stellarMass'] != 0.0 and row['redshift'] != 0.0:
-                    total_redshift_list.append(log(1+row['redshift']))
-                    total_mass_list.append(log(row['stellarMass']/final_mass))
+                    total_log_redshift_list.append(log(1+row['redshift']))
+                    total_log_mass_list.append(log(row['stellarMass']/final_mass))
 
                     redshift_list.append(log(1+row['redshift']))
                     mass_list.append(log(row['stellarMass']/final_mass))
@@ -108,27 +107,36 @@ def output_galaxies(galaxy_classification, label, sizes):
     # Creará un fichero csv con los datos de cada grupo de masa
     test = False
     if test:
-        test_dict = {'redshift': total_redshift_list, 'mass': total_mass_list}
+        test_dict = {'redshift': total_log_redshift_list, 
+                     'mass': total_log_mass_list}
         test_df = pd.DataFrame(test_dict)
         test_df.to_csv(f'{galaxy_classification}.csv')
 
     # Realiza el ajuste
-    test_fit = np.polyfit(total_redshift_list, total_mass_list, 3)
+    test_fit = np.polyfit(total_log_redshift_list, total_log_mass_list, 3)
 
     # Genera un conjunto de puntos entre el valor minimo y maximo de redshift
-    x = np.arange(min(total_redshift_list), max(total_redshift_list))
-    x = np.arange(0.0, 0.5, 0.05, dtype=float)
+    x = np.arange(min(total_log_redshift_list), max(total_log_redshift_list))
+    x = np.arange(0.0, 2.75, 0.05, dtype=float)
 
     # Ajuste de los puntos
     fit = np.poly1d(test_fit) 
 
+    x_fit = [x_fit_value for x_fit_value in fit(x) if x_fit_value > -9.0]
+
     # Plotea los puntos
-    ax.plot(x,fit(x),"--", label="fit")
+    ax.plot(x[:len(x_fit)], x_fit, "--", label="ajuste")
+
+    x_ticks = np.arange(sizes['x'][0], sizes['x'][1], sizes['x'][2])
+    y_ticks = np.arange(sizes['y'][0], sizes['y'][1], sizes['y'][2])
+
+    ax.set_xticks(x_ticks)
+    ax.set_yticks(y_ticks)
     
     # Genera la leyenda
     plt.legend()
     # Guarda la figura
-    plt.savefig(f'{getcwd()}/graficas/{galaxy_classification}.png', dpi=72)
+    plt.savefig(f'{getcwd()}/graficas/{galaxy_classification}.png', dpi=144)
 
     return [galaxy_classification, x, fit(x)]
 
@@ -146,8 +154,11 @@ def output_halos(halo_classification, label, sizes):
 
     @return
     """
+    total_log_redshift_list = []
+    total_log_mass_list = []
+    total_last_progenitor_id_list = []
+    total_m_Crit200_list = []
     total_redshift_list = []
-    total_mass_list = []
 
     data_dir = f'{getcwd()}/datos/{halo_classification}.csv'
     data = pd.read_csv(data_dir)
@@ -188,8 +199,11 @@ def output_halos(halo_classification, label, sizes):
                     redshift_list.append(log(1+row['redshift']))
                     mass_list.append(log(row['m_Crit200']/final_mass))
 
-                    total_redshift_list.append(log(1+row['redshift']))
-                    total_mass_list.append(log(row['m_Crit200']/final_mass))
+                    total_log_redshift_list.append(log(1+row['redshift']))
+                    total_log_mass_list.append(log(row['m_Crit200']/final_mass))
+                    total_redshift_list.append(row['redshift'])
+                    total_m_Crit200_list.append(row['m_Crit200'])
+                    total_last_progenitor_id_list.append(lastProgenitorId)
                 else:
                     raise Exception('Siempre deberia ser cero')
                 # Hemos empezado un nuevo ciclo asi que guardo el valor
@@ -199,8 +213,11 @@ def output_halos(halo_classification, label, sizes):
             # Agrega los valores si no hay valores nulos
             else:
                 if row['m_Crit200'] != 0.0 and row['redshift'] != 0.0:
-                    total_redshift_list.append(log(1+row['redshift']))
-                    total_mass_list.append(log(row['m_Crit200']/final_mass))
+                    total_log_redshift_list.append(log(1+row['redshift']))
+                    total_log_mass_list.append(log(row['m_Crit200']/final_mass))
+                    total_redshift_list.append(row['redshift'])
+                    total_m_Crit200_list.append(row['m_Crit200'])
+                    total_last_progenitor_id_list.append(lastProgenitorId)
 
                     redshift_list.append(log(1+row['redshift']))
                     mass_list.append(log(row['m_Crit200']/final_mass))
@@ -210,11 +227,6 @@ def output_halos(halo_classification, label, sizes):
 
     # Fija la etiqueta principal
     ax.set_title(label)
-    # y_ticks = np.arange(sizes['y'][0], sizes['y'][1], sizes['y'][2])
-    # x_ticks = np.arange(sizes['x'][0], sizes['x'][1], sizes['x'][2])
-
-    # ax.set_xticks(x_ticks)
-    # ax.set_yticks(y_ticks)
     # Fija las etiquetas por eje
     ax.set_xlabel(r'$\log [1+Z]$')
     ax.set_ylabel(r'$\log[M_{main} (z) / M_0]$')
@@ -223,32 +235,40 @@ def output_halos(halo_classification, label, sizes):
     
     # Si se quiere probar la salida de redshift y masa poner a True
     # Creará un fichero csv con los datos de cada grupo de masa
-    test = False
+    test = True
     if test:
-        test_dict = {'redshift': total_redshift_list, 'mass': total_mass_list}
+        test_dict = {'log_redshift': total_log_redshift_list, 
+                     'log_mass': total_log_mass_list}
         test_df = pd.DataFrame(test_dict)
-        test_df.to_csv(f'{halo_classification}.csv')
+        test_df.to_csv(f'{getcwd()}/datos_filtrados/{halo_classification}.csv')
 
     # Realiza el ajuste
-    test_fit = np.polyfit(total_redshift_list, total_mass_list, 3)
+    test_fit = np.polyfit(total_log_redshift_list, total_log_mass_list, 3)
 
     # Genera un conjunto de puntos entre el valor minimo y maximo de redshift
-    x = np.arange(min(total_redshift_list), max(total_redshift_list))
-    x = np.arange(0.0, 2, 0.05, dtype=float)
+    x = np.arange(min(total_log_redshift_list), max(total_log_redshift_list))
+    x = np.arange(0.0, 2.75, 0.05, dtype=float)
 
     # Ajuste de los puntos
-    fit = np.poly1d(test_fit) 
+    fit = np.poly1d(test_fit)
+
+    x_fit = [x_fit_value for x_fit_value in fit(x) if x_fit_value > -8.0]
 
     # Plotea los puntos
-    ax.plot(x, fit(x), "--", label="fit")
+    ax.plot(x[:len(x_fit)], x_fit, "--", label="ajuste")
+    
+    y_ticks = np.arange(sizes['y'][0], sizes['y'][1], sizes['y'][2])
+    x_ticks = np.arange(sizes['x'][0], sizes['x'][1], sizes['x'][2])
+
+    ax.set_xticks(x_ticks)
+    ax.set_yticks(y_ticks)
 
     # Genera la leyenda
     plt.legend()
     # Guarda la figura
-    plt.savefig(f'{getcwd()}/graficas/{halo_classification}.png', dpi=72)
+    plt.savefig(f'{getcwd()}/graficas/{halo_classification}.png', dpi=144)
 
     return [halo_classification, x, fit(x)]
-
 
 
 # Rutina principal para crear las gráficas
@@ -267,11 +287,11 @@ def main(galaxies, halos):
                     r'Halos > ' + r'$10^{13}$',]
 
         # Tamaño de las graficas de los halos
-        halos_size = [{'x': [0, 0.75, 0.25], 'y': [-1, 1, 0.5]},
-                    {'x': [0, 2.0, 0.25], 'y': [-2.5, 1, 0.5]},
-                    {'x': [0, 2.75, 0.25], 'y': [-6.5, 1, 0.5]},
-                    {'x': [0, 2.75, 0.25], 'y': [-7.5, 1, 0.5]},
-                    {'x': [0, 2.75, 0.25], 'y': [-10, 1, 0.5]}]
+        halos_size = [{'x': [-0.25, 3.25, 0.25], 'y': [-9.5, 2, 0.5]},
+                    {'x': [-0.25, 3.25, 0.25], 'y': [-9.5, 2, 0.5]},
+                    {'x': [-0.25, 3.25, 0.25], 'y': [-9.5, 2, 0.5]},
+                    {'x': [-0.25, 3.25, 0.25], 'y': [-9.5, 2, 0.5]},
+                    {'x': [-0.25, 3.25, 0.25], 'y': [-9.5, 2, 0.5]}]
 
         # Bucle for para crear las graficas de los halos
         try:
@@ -294,8 +314,15 @@ def main(galaxies, halos):
         ax_total.set_ylabel(r'$\log[M_{main} (z) / M_0]$')
 
         ax_total.grid(True)
+
+        x_ticks = np.arange(-0.25, 3.25, 0.25)
+        y_ticks = np.arange(-9.5, 2, 0.5)
+
+        ax_total.set_xticks(x_ticks)
+        ax_total.set_yticks(y_ticks)
+        
         plt.legend()
-        plt.savefig(f'{getcwd()}/graficas/halos_ajuste.png', dpi=72)
+        plt.savefig(f'{getcwd()}/graficas/halos_ajuste.png', dpi=144)
 
     if galaxies:
         fitted_groups = []
@@ -312,11 +339,11 @@ def main(galaxies, halos):
                         r'Galaxias > ' + r'$10^{13}$']
 
         # Tamaño de las gráficas de las galaxias
-        galaxies_size = [{'x': [0, 2.75, 0.25], 'y': [-9.5, 1, 0.5]},
-                        {'x': [0, 2.75, 0.25], 'y': [-9.5, 1, 0.5]},
-                        {'x': [0, 2.75, 0.25], 'y': [-9.5, 1, 0.5]},
-                        {'x': [0, 2.75, 0.25], 'y': [-9.5, 1, 0.5]},
-                        {'x': [0, 2.75, 0.25], 'y': [-12, 1, 0.5]}]
+        galaxies_size = [{'x': [-0.25, 3.25, 0.25], 'y': [-12, 1, 0.5]},
+                        {'x': [-0.25, 3.25, 0.25], 'y': [-12, 1, 0.5]},
+                        {'x': [-0.25, 3.25, 0.25], 'y': [-12, 1, 0.5]},
+                        {'x': [-0.25, 3.25, 0.25], 'y': [-12, 1, 0.5]},
+                        {'x': [-0.25, 3.25, 0.25], 'y': [-12, 1, 0.5]}]
 
         # Bucle for para crear las graficas de las galaxias
         try:
@@ -331,8 +358,9 @@ def main(galaxies, halos):
         # Bucle for para crear la gráfica con los ajustes
         import matplotlib.pyplot as plt
         fig2, ax_total = plt.subplots(figsize=(11.69, 8.27))
-        for group in fitted_groups:
-            ax_total.plot(group[1], group[2], label=group[0])
+        for group in fitted_groups[1:]:
+            y_values = [x_value for x_value in group[2] if x_value > -11.5]
+            ax_total.plot(group[1][:len(y_values)], y_values, label=group[0])
 
         ax_total.set_title('Ajuste por masa')
 
@@ -340,11 +368,18 @@ def main(galaxies, halos):
         ax_total.set_ylabel(r'$\log[M_{main} (z) / M_0]$')
 
         ax_total.grid(True)
+
+        x_ticks = np.arange(-0.25, 3.25, 0.25)
+        y_ticks = np.arange(-12, 1, 0.5)
+
+        ax_total.set_xticks(x_ticks)
+        ax_total.set_yticks(y_ticks)
+
         plt.legend()
-        plt.savefig(f'{getcwd()}/graficas/galaxias_ajuste.png', dpi=72)
+        plt.savefig(f'{getcwd()}/graficas/galaxias_ajuste.png', dpi=144)
 
 
 if __name__ == "__main__":
-    galaxies = False
-    halos = True
+    galaxies = True
+    halos = False
     main(galaxies, halos)
