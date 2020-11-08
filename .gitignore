@@ -2,3 +2,4 @@
 /.vscode
 /test.csv
 /venv
+*.png
