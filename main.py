@@ -25,6 +25,9 @@ def output_galaxies(galaxy_classification, label, sizes):
     """
     total_log_redshift_list = []
     total_log_mass_list = []
+    total_last_progenitor_id_list = []
+    total_stellar_mass_list = []
+    total_redshift_list = []
 
     data_dir = f'{getcwd()}/datos/{galaxy_classification}.csv'
     data = pd.read_csv(data_dir, error_bad_lines=False)
@@ -72,6 +75,9 @@ def output_galaxies(galaxy_classification, label, sizes):
                     # Agrega los datos a la lista total
                     total_log_redshift_list.append(log(1+row['redshift']))
                     total_log_mass_list.append(log(row['stellarMass']/final_mass))
+                    total_redshift_list.append(row['redshift'])
+                    total_stellar_mass_list.append(row['stellarMass'])
+                    total_last_progenitor_id_list.append(lastProgenitorId)
 
                     redshift_list.append(log(1+row['redshift']))
                     mass_list.append(log(row['stellarMass']/final_mass))
@@ -86,6 +92,9 @@ def output_galaxies(galaxy_classification, label, sizes):
                 if row['stellarMass'] != 0.0 and row['redshift'] != 0.0:
                     total_log_redshift_list.append(log(1+row['redshift']))
                     total_log_mass_list.append(log(row['stellarMass']/final_mass))
+                    total_redshift_list.append(row['redshift'])
+                    total_stellar_mass_list.append(row['stellarMass'])
+                    total_last_progenitor_id_list.append(lastProgenitorId)
 
                     redshift_list.append(log(1+row['redshift']))
                     mass_list.append(log(row['stellarMass']/final_mass))
@@ -105,12 +114,15 @@ def output_galaxies(galaxy_classification, label, sizes):
 
     # Si se quiere probar la salida de redshift y masa poner a True
     # Creará un fichero csv con los datos de cada grupo de masa
-    test = False
+    test = True
     if test:
-        test_dict = {'redshift': total_log_redshift_list, 
-                     'mass': total_log_mass_list}
+        test_dict = {'log_redshift': total_log_redshift_list, 
+                     'log_mass': total_log_mass_list,
+                     'redshift': total_redshift_list,
+                     'stellarMass': total_stellar_mass_list,
+                     'lastProgenitorId': total_last_progenitor_id_list}
         test_df = pd.DataFrame(test_dict)
-        test_df.to_csv(f'{galaxy_classification}.csv')
+        test_df.to_csv(f'{getcwd()}/datos_filtrados/{galaxy_classification}.csv')
 
     # Realiza el ajuste
     test_fit = np.polyfit(total_log_redshift_list, total_log_mass_list, 3)
@@ -238,7 +250,10 @@ def output_halos(halo_classification, label, sizes):
     test = True
     if test:
         test_dict = {'log_redshift': total_log_redshift_list, 
-                     'log_mass': total_log_mass_list}
+                     'log_mass': total_log_mass_list,
+                     'redshift': total_redshift_list,
+                     'm_Crit200': total_m_Crit200_list,
+                     'lastProgenitorId': total_last_progenitor_id_list}
         test_df = pd.DataFrame(test_dict)
         test_df.to_csv(f'{getcwd()}/datos_filtrados/{halo_classification}.csv')
 
@@ -381,5 +396,5 @@ def main(galaxies, halos):
 
 if __name__ == "__main__":
     galaxies = True
-    halos = False
+    halos = True
     main(galaxies, halos)
