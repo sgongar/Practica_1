@@ -287,7 +287,7 @@ def output_halos(halo_classification, label, sizes):
 
 
 # Rutina principal para crear las gráficas
-def main(galaxies, halos):
+def main_analysis_function(galaxies, halos):
     if halos:
         fitted_groups = []
         # Nombre de los ficheros de los halos
@@ -394,7 +394,19 @@ def main(galaxies, halos):
         plt.savefig(f'{getcwd()}/graficas/galaxias_ajuste.png', dpi=144)
 
 
+def figure_3_function():
+    pass
+
+
 if __name__ == "__main__":
-    galaxies = True
-    halos = True
-    main(galaxies, halos)
+    """ Elegir el analisis deseado
+
+    """
+    main_analysis = False
+    figure_3 = False
+    if main_analysis:
+        galaxies = True
+        halos = True
+        main_analysis_function(galaxies, halos)
+    elif figure_3:
+        figure_3_function()
