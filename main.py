@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 def output_galaxies(galaxy_classification, label, sizes):
     """ Esta funcion se encarga de plotear la relación entre z y masa de los
     diferentes galaxias de cada grupo de masas. Creara un fichero de la forma:
-    - galaxias_{valor_inferior}_{valor_superior}.png
+    - galaxias_{valor_inferior}_{valor_superior}.jpg
     
     Devolverá los valores ploteados en forma de lista.
 
@@ -50,7 +50,7 @@ def output_galaxies(galaxy_classification, label, sizes):
                     # Ploteamos los valores que tenemos
                     # Para facilitar la identificacion de la curva asignamos
                     # el id del ultimo progenitor como etiqueta de la misma
-                    ax.plot(redshift_list, mass_list, label=lastProgenitorId)
+                    ax.plot(redshift_list, mass_list)
                     # Los reiniciamos a cero
                     redshift_list = []
                     mass_list = []
@@ -105,10 +105,10 @@ def output_galaxies(galaxy_classification, label, sizes):
         print(str(e))
 
     # Fija la etiqueta principal
-    ax.set_title(label)
+    ax.set_title(label, fontsize=20)
     # Fija las etiquetas por eje
-    ax.set_xlabel(r'$\log [1+Z]$')
-    ax.set_ylabel(r'$\log[M_{main} (z) / M_0]$')
+    ax.set_xlabel(r'$\log [1+Z]$', fontsize=18)
+    ax.set_ylabel(r'$\log[M_{main} (z) / M_0]$', fontsize=18)
     # Crea el grid
     ax.grid(True)
 
@@ -148,7 +148,7 @@ def output_galaxies(galaxy_classification, label, sizes):
     # Genera la leyenda
     plt.legend()
     # Guarda la figura
-    plt.savefig(f'{getcwd()}/graficas/{galaxy_classification}.png', dpi=144)
+    plt.savefig(f'{getcwd()}/graficas/{galaxy_classification}.jpg', dpi=144)
 
     return [galaxy_classification, x, fit(x)]
 
@@ -157,7 +157,7 @@ def output_galaxies(galaxy_classification, label, sizes):
 def output_halos(halo_classification, label, sizes):
     """ Esta funcion se encarga de plotear la relación entre z y masa de los
     diferentes halos de cada grupo de masas. Creara un fichero de la forma:
-    - halos_{valor_inferior}_{valor_superior}.png
+    - halos_{valor_inferior}_{valor_superior}.jpg
 
     @param halo_classification: valor en masa de la galaxia.
     @param label: etiqueta del plot a generar
@@ -193,7 +193,7 @@ def output_halos(halo_classification, label, sizes):
                     # Ploteamos los valores que tenemos
                     # Para facilitar la identificacion de la curva asignamos
                     # el id del ultimo progenitor como etiqueta de la misma
-                    ax.plot(redshift_list, mass_list, label=lastProgenitorId)
+                    ax.plot(redshift_list, mass_list)
                     redshift_list = []
                     mass_list = []
                 # Iniciamos un nuevo ciclo
@@ -238,10 +238,11 @@ def output_halos(halo_classification, label, sizes):
         print(str(e))
 
     # Fija la etiqueta principal
-    ax.set_title(label)
+    ax.set_title(label, fontsize=20)
     # Fija las etiquetas por eje
-    ax.set_xlabel(r'$\log [1+Z]$')
-    ax.set_ylabel(r'$\log[M_{main} (z) / M_0]$')
+    ax.set_xlabel(r'$\log [1+Z]$', fontsize=18)
+    ax.set_ylabel(r'$\log[M_{main} (z) / M_0]$', fontsize=18)
+
     # Crea el grid
     ax.grid(True)
     
@@ -281,7 +282,7 @@ def output_halos(halo_classification, label, sizes):
     # Genera la leyenda
     plt.legend()
     # Guarda la figura
-    plt.savefig(f'{getcwd()}/graficas/{halo_classification}.png', dpi=144)
+    plt.savefig(f'{getcwd()}/graficas/{halo_classification}.jpg', dpi=144)
 
     return [halo_classification, x, fit(x)]
 
@@ -321,12 +322,12 @@ def main_analysis_function(galaxies, halos):
         import matplotlib.pyplot as plt
         fig2, ax_total = plt.subplots(figsize=(11.69, 8.27))
         for group in fitted_groups[1:]:
-            ax_total.plot(group[1], group[2], label=group[0])
+            ax_total.plot(group[1], group[2])
 
-        ax_total.set_title('Ajuste por masa')
+        ax_total.set_title('Ajuste por masa', fontsize=20)
 
-        ax_total.set_xlabel(r'$\log [1+Z]$')
-        ax_total.set_ylabel(r'$\log[M_{main} (z) / M_0]$')
+        ax_total.set_xlabel(r'$\log [1+Z]$', fontsize=18)
+        ax_total.set_ylabel(r'$\log[M_{main} (z) / M_0]$', fontsize=18)
 
         ax_total.grid(True)
 
@@ -337,7 +338,7 @@ def main_analysis_function(galaxies, halos):
         ax_total.set_yticks(y_ticks)
         
         plt.legend()
-        plt.savefig(f'{getcwd()}/graficas/halos_ajuste.png', dpi=144)
+        plt.savefig(f'{getcwd()}/graficas/halos_ajuste.jpg', dpi=144)
 
     if galaxies:
         fitted_groups = []
@@ -375,13 +376,13 @@ def main_analysis_function(galaxies, halos):
         fig2, ax_total = plt.subplots(figsize=(11.69, 8.27))
         for group in fitted_groups[1:]:
             y_values = [x_value for x_value in group[2] if x_value > -11.5]
-            ax_total.plot(group[1][:len(y_values)], y_values, label=group[0])
+            ax_total.plot(group[1][:len(y_values)], y_values)
 
-        ax_total.set_title('Ajuste por masa')
+        ax_total.set_title('Ajuste por masa', fontsize=20)
 
-        ax_total.set_xlabel(r'$\log [1+Z]$')
-        ax_total.set_ylabel(r'$\log[M_{main} (z) / M_0]$')
-
+        ax_total.set_xlabel(r'$\log [1+Z]$', fontsize=18)
+        ax_total.set_ylabel(r'$\log[M_{main} (z) / M_0]$', fontsize=18)
+        
         ax_total.grid(True)
 
         x_ticks = np.arange(-0.25, 3.25, 0.25)
@@ -391,7 +392,7 @@ def main_analysis_function(galaxies, halos):
         ax_total.set_yticks(y_ticks)
 
         plt.legend()
-        plt.savefig(f'{getcwd()}/graficas/galaxias_ajuste.png', dpi=144)
+        plt.savefig(f'{getcwd()}/graficas/galaxias_ajuste.jpg', dpi=144)
 
 
 def figure_3_function():
@@ -402,7 +403,7 @@ if __name__ == "__main__":
     """ Elegir el analisis deseado
 
     """
-    main_analysis = False
+    main_analysis = True
     figure_3 = False
     if main_analysis:
         galaxies = True
